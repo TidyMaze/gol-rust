@@ -1,7 +1,7 @@
 use rand::prelude::*;
 
-const HEIGHT: usize = 10;
-const WIDTH: usize = 20;
+const HEIGHT: usize = 100;
+const WIDTH: usize = 200;
 type Grid = [[bool; WIDTH]; HEIGHT];
 
 fn show_bool(b: &bool) -> &str {
@@ -22,23 +22,23 @@ fn dead_or_alive(alive: bool, neighbors: u8) -> bool {
 }
 
 fn count_neighbors(grid: Grid, j: usize, i: usize) -> u8 {
-    let neighbors: [(i8, i8); 8] = [
-        (j as i8 - 1, i as i8 - 1),
-        (j as i8, i as i8 - 1),
-        (j as i8 + 1, i as i8 - 1),
-        (j as i8 - 1, i as i8),
-        (j as i8 + 1, i as i8),
-        (j as i8 - 1, i as i8 + 1),
-        (j as i8, i as i8 + 1),
-        (j as i8 + 1, i as i8 + 1),
+    let neighbors: [(i16, i16); 8] = [
+        (j as i16 - 1, i as i16 - 1),
+        (j as i16, i as i16 - 1),
+        (j as i16 + 1, i as i16 - 1),
+        (j as i16 - 1, i as i16),
+        (j as i16 + 1, i as i16),
+        (j as i16 - 1, i as i16 + 1),
+        (j as i16, i as i16 + 1),
+        (j as i16 + 1, i as i16 + 1),
     ];
     return neighbors
         .iter()
         .filter(|(o_j, o_i)| {
             *o_j >= 0
-                && *o_j < WIDTH as i8
+                && *o_j < WIDTH as i16
                 && *o_i >= 0
-                && *o_i < HEIGHT as i8
+                && *o_i < HEIGHT as i16
                 && grid[*o_i as usize][*o_j as usize]
         })
         .count() as u8;
