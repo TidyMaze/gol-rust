@@ -34,12 +34,12 @@ fn count_neighbors(grid: Grid, j: usize, i: usize) -> u8 {
     ];
     return neighbors
         .iter()
-        .filter(|(oJ, oI)| {
-            *oJ >= 0
-                && *oJ < WIDTH as i8
-                && *oI >= 0
-                && *oI < HEIGHT as i8
-                && grid[*oI as usize][*oJ as usize]
+        .filter(|(o_j, o_i)| {
+            *o_j >= 0
+                && *o_j < WIDTH as i8
+                && *o_i >= 0
+                && *o_i < HEIGHT as i8
+                && grid[*o_i as usize][*o_j as usize]
         })
         .count() as u8;
 }
