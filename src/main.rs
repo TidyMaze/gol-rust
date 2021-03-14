@@ -90,8 +90,12 @@ async fn main() {
     for i in 0..10000 {
         clear_background(BLACK_ALPHA);
 
-        g = one_step(&g);
-        println!("==================== - {}", i);
+        let step = 10;
+
+        for sub in 0..step {
+            g = one_step(&g);
+            println!("==================== - {}", step * i + sub);
+        }
         // print_grid(&g)
 
         for i in 0..height as usize {
