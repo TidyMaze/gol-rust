@@ -68,7 +68,7 @@ fn make_rand_grid(height: usize, width: usize) -> Grid {
         let mut line: Vec<bool> = Vec::new();
 
         for j in 0..width {
-            line.push(gen_range(0, 101) >= 50);
+            line.push(gen_range(0, 101) < 7);
         }
         res.push(line);
     }
