@@ -83,8 +83,13 @@ async fn main() {
     let init = make_rand_grid(height as usize, width as usize);
     let mut g = init;
 
+    clear_background(BLACK);
+
+    pub const BLACK_ALPHA: Color = Color::new(0.00, 0.00, 0.00, 0.0);
+
     for i in 0..10000 {
-        clear_background(BLACK);
+        clear_background(BLACK_ALPHA);
+
         g = one_step(&g);
         println!("==================== - {}", i);
         // print_grid(&g)
