@@ -3,18 +3,18 @@ use macroquad::prelude::*;
 
 type Grid = Vec<Vec<bool>>;
 
-fn show_bool(b: &bool) -> &str {
-    return if *b { "O" } else { "." };
-}
+// fn show_bool(b: &bool) -> &str {
+//     return if *b { "O" } else { "." };
+// }
 
-fn print_grid(grid: &Grid) {
-    let lines = grid
-        .iter()
-        .map(|l| l.iter().map(show_bool).collect::<Vec<&str>>().join(""))
-        .collect::<Vec<String>>()
-        .join("\n");
-    println!("{}", lines);
-}
+// fn print_grid(grid: &Grid) {
+//     let lines = grid
+//         .iter()
+//         .map(|l| l.iter().map(show_bool).collect::<Vec<&str>>().join(""))
+//         .collect::<Vec<String>>()
+//         .join("\n");
+//     println!("{}", lines);
+// }
 
 fn dead_or_alive(alive: bool, neighbors: u8) -> bool {
     return (alive && neighbors >= 2 && neighbors <= 3) || (!alive && neighbors == 3);
@@ -62,12 +62,25 @@ fn one_step(grid: &Grid) -> Grid {
     return new_grid;
 }
 
+fn make_empty_grid(height: usize, width: usize) -> Vec<Vec<u8>> {
+    let mut res: Vec<Vec<u8>> = Vec::new();
+    for _i in 0..height {
+        let mut line: Vec<u8> = Vec::new();
+
+        for _j in 0..width {
+            line.push(0);
+        }
+        res.push(line);
+    }
+    return res;
+}
+
 fn make_rand_grid(height: usize, width: usize) -> Grid {
     let mut res: Grid = Vec::new();
-    for i in 0..height {
+    for _i in 0..height {
         let mut line: Vec<bool> = Vec::new();
 
-        for j in 0..width {
+        for _j in 0..width {
             line.push(gen_range(0, 101) < 7);
         }
         res.push(line);
@@ -75,22 +88,31 @@ fn make_rand_grid(height: usize, width: usize) -> Grid {
     return res;
 }
 
+fn map_range(from_range: (f32, f32), to_range: (f32, f32), s: f32) -> f32 {
+    to_range.0 + (s - from_range.0) * (to_range.1 - to_range.0) / (from_range.1 - from_range.0)
+}
+
 #[macroquad::main("BasicShapes")]
 async fn main() {
     let height = screen_height() as u32;
     let width = screen_width() as u32;
 
+    println!("{} {}", height, width);
+
     let init = make_rand_grid(height as usize, width as usize);
+
+    let mut hot = make_empty_grid(height as usize, width as usize);
+
     let mut g = init;
 
     clear_background(BLACK);
 
-    pub const BLACK_ALPHA: Color = Color::new(0.00, 0.00, 0.00, 0.0);
+    pub const BLACK_ALPHA: Color = Color::new(0.00, 0.00, 0.00, 1.0);
 
     for i in 0..10000 {
         clear_background(BLACK_ALPHA);
 
-        let step = 10;
+        let step = 1;
 
         for sub in 0..step {
             g = one_step(&g);
@@ -101,7 +123,16 @@ async fn main() {
         for i in 0..height as usize {
             for j in 0..width as usize {
                 if g[i][j] {
+                    hot[i][j] = 255;
                     draw_rectangle(j as f32, i as f32, 1 as f32, 1 as f32, BLUE);
+                } else {
+                    if hot[i][j] > 100 {
+                        hot[i][j] = hot[i][j] - 1;
+                    }
+                    let color = Color::new(0.00, 0.00, map_range((0 as f32,255 as f32), (0.0 as f32, 1.0 as f32), hot[i][j] as f32), 1.00);
+                    if hot[i][j] > 0 {
+                        draw_rectangle(j as f32, i as f32, 1 as f32, 1 as f32, color);
+                    }
                 }
             }
         }
