@@ -130,7 +130,7 @@ async fn main() {
             for j in 0..width as usize {
                 if g[i][j] {
                     hot[i][j] = 255;
-                    img.set_pixel(j as u32, i as u32, BLUE);
+                    img.set_pixel(j as u32, i as u32, WHITE);
                 } else {
                     if hot[i][j] > 100 {
                         hot[i][j] = hot[i][j] - 1;
