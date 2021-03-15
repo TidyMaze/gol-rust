@@ -109,6 +109,8 @@ async fn main() {
 
     pub const BLACK_ALPHA: Color = Color::new(0.00, 0.00, 0.00, 1.0);
 
+    let mut color = Color::new(0.00, 0.00, 0.00, 1.00);
+
     for i in 0..10000 {
         clear_background(BLACK_ALPHA);
 
@@ -129,8 +131,9 @@ async fn main() {
                     if hot[i][j] > 100 {
                         hot[i][j] = hot[i][j] - 1;
                     }
-                    let color = Color::new(0.00, 0.00, map_range((0 as f32,255 as f32), (0.0 as f32, 1.0 as f32), hot[i][j] as f32), 1.00);
+                    
                     if hot[i][j] > 0 {
+                        color.b = map_range((0 as f32,255 as f32), (0.0 as f32, 1.0 as f32), hot[i][j] as f32);
                         draw_rectangle(j as f32, i as f32, 1 as f32, 1 as f32, color);
                     }
                 }
