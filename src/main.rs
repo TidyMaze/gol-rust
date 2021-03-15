@@ -122,11 +122,13 @@ async fn main() {
         }
         // print_grid(&g)
 
+        let mut img: Image = Image::gen_image_color(width as u16, height as u16, BLACK);
+
         for i in 0..height as usize {
             for j in 0..width as usize {
                 if g[i][j] {
                     hot[i][j] = 255;
-                    draw_rectangle(j as f32, i as f32, 1 as f32, 1 as f32, BLUE);
+                    img.set_pixel(j as u32, i as u32, BLUE);
                 } else {
                     if hot[i][j] > 100 {
                         hot[i][j] = hot[i][j] - 1;
@@ -134,11 +136,15 @@ async fn main() {
                     
                     if hot[i][j] > 0 {
                         color.b = map_range((0 as f32,255 as f32), (0.0 as f32, 1.0 as f32), hot[i][j] as f32);
-                        draw_rectangle(j as f32, i as f32, 1 as f32, 1 as f32, color);
+                        img.set_pixel(j as u32, i as u32, color);
                     }
                 }
             }
         }
+
+        let texture = load_texture_from_image(&img);
+
+        draw_texture(texture, 0 as f32, 0 as f32, WHITE);
 
         next_frame().await
     }
