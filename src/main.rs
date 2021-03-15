@@ -111,6 +111,8 @@ async fn main() {
 
     let mut color = Color::new(0.00, 0.00, 0.00, 1.00);
 
+    let texture = load_texture_from_image(&Image::gen_image_color(width as u16, height as u16, BLACK));
+
     for i in 0..10000 {
         clear_background(BLACK_ALPHA);
 
@@ -142,8 +144,7 @@ async fn main() {
             }
         }
 
-        let texture = load_texture_from_image(&img);
-
+        update_texture(texture, &img);
         draw_texture(texture, 0 as f32, 0 as f32, WHITE);
 
         next_frame().await
