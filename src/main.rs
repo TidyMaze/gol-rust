@@ -1,5 +1,6 @@
 use macroquad::prelude::rand::gen_range;
 use macroquad::prelude::*;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 type Grid = Vec<Vec<bool>>;
 
@@ -49,17 +50,18 @@ fn count_neighbors(grid: &Grid, j: usize, i: usize) -> u8 {
     return cnt;
 }
 
-fn one_step(grid: &Grid) -> Grid {
-    let mut new_grid: Grid = Vec::new();
+fn one_step(grid: &mut Grid, buffer: &mut Grid) {
     for i in 0..grid.len() {
-        let mut line: Vec<bool> = Vec::new();
-
         for j in 0..grid[0].len() {
-            line.push(dead_or_alive(grid[i][j], count_neighbors(grid, j, i)));
+            buffer[i][j] = dead_or_alive(grid[i][j], count_neighbors(grid, j, i));
         }
-        new_grid.push(line);
     }
-    return new_grid;
+
+    for i in 0..grid.len() {
+        for j in 0..grid[0].len() {
+            grid[i][j] = buffer[i][j];
+        }
+    }
 }
 
 fn make_empty_grid(height: usize, width: usize) -> Vec<Vec<u8>> {
@@ -69,6 +71,19 @@ fn make_empty_grid(height: usize, width: usize) -> Vec<Vec<u8>> {
 
         for _j in 0..width {
             line.push(0);
+        }
+        res.push(line);
+    }
+    return res;
+}
+
+fn make_empty_grid_bool(height: usize, width: usize) -> Vec<Vec<bool>> {
+    let mut res: Vec<Vec<bool>> = Vec::new();
+    for _i in 0..height {
+        let mut line: Vec<bool> = Vec::new();
+
+        for _j in 0..width {
+            line.push(false);
         }
         res.push(line);
     }
@@ -94,16 +109,15 @@ fn map_range(from_range: (f32, f32), to_range: (f32, f32), s: f32) -> f32 {
 
 #[macroquad::main("BasicShapes")]
 async fn main() {
-    let height = screen_height() as u32;
-    let width = screen_width() as u32;
+    let height = screen_height() as u32 / 2;
+    let width = screen_width() as u32 / 2;
 
     println!("{} {}", height, width);
 
-    let init = make_rand_grid(height as usize, width as usize);
-
     let mut hot = make_empty_grid(height as usize, width as usize);
 
-    let mut g = init;
+    let mut g = make_rand_grid(height as usize, width as usize);
+    let mut buffer = make_empty_grid_bool(height as usize, width as usize);
 
     clear_background(BLACK);
 
@@ -113,14 +127,21 @@ async fn main() {
 
     let texture = load_texture_from_image(&Image::gen_image_color(width as u16, height as u16, BLACK));
 
-    for i in 0..10000 {
+    let start = SystemTime::now();
+
+    let mut count_step: u32 = 0;
+
+    for _i in 0..10000 {
         clear_background(BLACK_ALPHA);
 
-        let step = 1;
+        let step = 5;
 
-        for sub in 0..step {
-            g = one_step(&g);
-            println!("==================== - {}", step * i + sub);
+        for _sub in 0..step {
+            one_step(&mut g, &mut buffer);
+            count_step += 1;
+            let elapsed = SystemTime::now().duration_since(start).unwrap().as_secs();
+            let speed = count_step as f32 / elapsed as f32;
+            println!("==================== - {} - {}", count_step, speed);
         }
         // print_grid(&g)
 
