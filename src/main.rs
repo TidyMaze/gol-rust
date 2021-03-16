@@ -1,21 +1,8 @@
 use macroquad::prelude::rand::gen_range;
 use macroquad::prelude::*;
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::SystemTime;
 
 type Grid = Vec<Vec<bool>>;
-
-// fn show_bool(b: &bool) -> &str {
-//     return if *b { "O" } else { "." };
-// }
-
-// fn print_grid(grid: &Grid) {
-//     let lines = grid
-//         .iter()
-//         .map(|l| l.iter().map(show_bool).collect::<Vec<&str>>().join(""))
-//         .collect::<Vec<String>>()
-//         .join("\n");
-//     println!("{}", lines);
-// }
 
 fn dead_or_alive(alive: bool, neighbors: u8) -> bool {
     return (alive && neighbors >= 2 && neighbors <= 3) || (!alive && neighbors == 3);
@@ -132,7 +119,7 @@ async fn main() {
     let mut count_step: u32 = 0;
 
     for _i in 0..10000 {
-        clear_background(BLACK_ALPHA);
+        clear_background(BLACK);
 
         let step = 5;
 
