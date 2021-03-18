@@ -42,11 +42,6 @@ fn one_step(grid: &mut Grid, buffer: &mut Grid, look_change_map: &mut Grid) {
             if look_change_map[i][j] {
                 buffer[i][j] = dead_or_alive(grid[i][j], count_neighbors(grid, j, i));
             }
-        }
-    }
-
-    for i in 0..grid.len() {
-        for j in 0..grid[0].len() {
             look_change_map[i][j] = false;
         }
     }
@@ -177,7 +172,6 @@ async fn main() {
                 100 - ((cnt_changed as f32 / total_cells as f32) * 100 as f32) as u16
             );
         }
-        // print_grid(&g)
 
         for i in 0..height as usize {
             for j in 0..width as usize {
