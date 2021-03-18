@@ -36,7 +36,7 @@ fn count_neighbors(grid: &Grid, j: usize, i: usize) -> u8 {
     return cnt;
 }
 
-fn one_step(grid: &mut Grid, buffer: &mut Grid, look_change_map: &mut Grid) {    
+fn one_step(grid: &mut Grid, buffer: &mut Grid, look_change_map: &mut Grid) {
     for i in 0..grid.len() {
         for j in 0..grid[0].len() {
             if look_change_map[i][j] {
@@ -53,7 +53,6 @@ fn one_step(grid: &mut Grid, buffer: &mut Grid, look_change_map: &mut Grid) {
 
     for i in 0..grid.len() {
         for j in 0..grid[0].len() {
-            
             if buffer[i][j] != grid[i][j] {
                 for (o_j, o_i) in &OFFSETS {
                     let dj: i16 = j as i16 + o_j;
@@ -144,7 +143,8 @@ async fn main() {
 
     let mut color = Color::new(0.00, 0.00, 0.00, 1.00);
 
-    let texture = load_texture_from_image(&Image::gen_image_color(width as u16, height as u16, BLACK));
+    let texture =
+        load_texture_from_image(&Image::gen_image_color(width as u16, height as u16, BLACK));
 
     let start = SystemTime::now();
 
@@ -153,8 +153,6 @@ async fn main() {
     let total_cells = height * width;
 
     for _i in 0..10000 {
-        clear_background(BLACK);
-
         let step = 3;
 
         for _sub in 0..step {
@@ -172,7 +170,14 @@ async fn main() {
                 }
             }
 
-            println!("{} - {} - changed look up {} / {} ({}%)", count_step, speed as u16, cnt_changed, total_cells, ((cnt_changed as f32 / total_cells as f32) * 100 as f32) as u16);
+            println!(
+                "{} - {} - changed look up {} / {} (skipped {}% with lookup)",
+                count_step,
+                speed as u16,
+                cnt_changed,
+                total_cells,
+                100 - ((cnt_changed as f32 / total_cells as f32) * 100 as f32) as u16
+            );
         }
         // print_grid(&g)
 
@@ -181,16 +186,20 @@ async fn main() {
         for i in 0..height as usize {
             for j in 0..width as usize {
                 if g[i][j] {
-                    // hot[i][j] = 255;
+                    hot[i][j] = 255;
                     img.set_pixel(j as u32, i as u32, WHITE);
                 } else {
-                    // if hot[i][j] > 100 {
-                    // hot[i][j] = hot[i][j] - 1;
-                    // }
-                    // if hot[i][j] > 0 {
-                    // color.b = map_range((0 as f32,255 as f32), (0.0 as f32, 1.0 as f32), hot[i][j] as f32);
-                    // img.set_pixel(j as u32, i as u32, color);
-                    // }
+                    if hot[i][j] > 100 {
+                        hot[i][j] = hot[i][j] - 1;
+                    }
+                    if hot[i][j] > 0 {
+                        color.b = map_range(
+                            (0 as f32, 255 as f32),
+                            (0.0 as f32, 1.0 as f32),
+                            hot[i][j] as f32,
+                        );
+                        img.set_pixel(j as u32, i as u32, color);
+                    }
                 }
             }
         }
