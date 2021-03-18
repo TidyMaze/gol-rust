@@ -76,26 +76,13 @@ fn make_empty_grid(height: usize, width: usize) -> Vec<Vec<u8>> {
     return res;
 }
 
-fn make_empty_grid_bool(height: usize, width: usize) -> Vec<Vec<bool>> {
+fn make_empty_grid_bool(height: usize, width: usize, value: bool) -> Vec<Vec<bool>> {
     let mut res: Vec<Vec<bool>> = Vec::new();
     for _i in 0..height {
         let mut line: Vec<bool> = Vec::new();
 
         for _j in 0..width {
-            line.push(false);
-        }
-        res.push(line);
-    }
-    return res;
-}
-
-fn make_empty_grid_bool_true(height: usize, width: usize) -> Vec<Vec<bool>> {
-    let mut res: Vec<Vec<bool>> = Vec::new();
-    for _i in 0..height {
-        let mut line: Vec<bool> = Vec::new();
-
-        for _j in 0..width {
-            line.push(true);
+            line.push(value);
         }
         res.push(line);
     }
@@ -129,8 +116,8 @@ async fn main() {
     let mut hot = make_empty_grid(height as usize, width as usize);
 
     let mut g = make_rand_grid(height as usize, width as usize);
-    let mut buffer = make_empty_grid_bool(height as usize, width as usize);
-    let mut neighbor_of_updated_cell = make_empty_grid_bool_true(height as usize, width as usize);
+    let mut buffer = make_empty_grid_bool(height as usize, width as usize, false);
+    let mut neighbor_of_updated_cell = make_empty_grid_bool(height as usize, width as usize, true);
 
     let mut color = Color::new(0.00, 0.00, 0.00, 1.00);
 
