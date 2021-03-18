@@ -137,10 +137,6 @@ async fn main() {
     let mut buffer = make_empty_grid_bool(height as usize, width as usize);
     let mut look_change_map = make_empty_grid_bool_true(height as usize, width as usize);
 
-    clear_background(BLACK);
-
-    pub const BLACK_ALPHA: Color = Color::new(0.00, 0.00, 0.00, 1.0);
-
     let mut color = Color::new(0.00, 0.00, 0.00, 1.00);
 
     let texture =
@@ -151,6 +147,8 @@ async fn main() {
     let mut count_step: u32 = 0;
 
     let total_cells = height * width;
+
+    let mut img: Image = Image::gen_image_color(width as u16, height as u16, BLACK);
 
     for _i in 0..10000 {
         let step = 3;
@@ -181,8 +179,6 @@ async fn main() {
         }
         // print_grid(&g)
 
-        let mut img: Image = Image::gen_image_color(width as u16, height as u16, BLACK);
-
         for i in 0..height as usize {
             for j in 0..width as usize {
                 if g[i][j] {
@@ -206,7 +202,6 @@ async fn main() {
 
         update_texture(texture, &img);
         draw_texture(texture, 0 as f32, 0 as f32, WHITE);
-
         next_frame().await
     }
 }
