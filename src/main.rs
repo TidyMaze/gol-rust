@@ -41,8 +41,8 @@ fn one_step(grid: &mut Grid, buffer: &mut Grid, look_change_map: &mut Grid) {
         for j in 0..grid[0].len() {
             if look_change_map[i][j] {
                 buffer[i][j] = dead_or_alive(grid[i][j], count_neighbors(grid, j, i));
+                look_change_map[i][j] = false;
             }
-            look_change_map[i][j] = false;
         }
     }
 
@@ -146,7 +146,7 @@ async fn main() {
     let mut img: Image = Image::gen_image_color(width as u16, height as u16, BLACK);
 
     for _i in 0..10000 {
-        let step = 3;
+        let step = 2;
 
         for _sub in 0..step {
             one_step(&mut g, &mut buffer, &mut look_change_map);
