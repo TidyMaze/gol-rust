@@ -130,7 +130,7 @@ async fn main() {
 
     let mut g = make_rand_grid(height as usize, width as usize);
     let mut buffer = make_empty_grid_bool(height as usize, width as usize);
-    let mut look_change_map = make_empty_grid_bool_true(height as usize, width as usize);
+    let mut neighbor_of_updated_cell = make_empty_grid_bool_true(height as usize, width as usize);
 
     let mut color = Color::new(0.00, 0.00, 0.00, 1.00);
 
@@ -149,7 +149,7 @@ async fn main() {
         let step = 2;
 
         for _sub in 0..step {
-            one_step(&mut g, &mut buffer, &mut look_change_map);
+            one_step(&mut g, &mut buffer, &mut neighbor_of_updated_cell);
             count_step += 1;
             let elapsed = SystemTime::now().duration_since(start).unwrap().as_secs();
             let speed = count_step as f32 / elapsed as f32;
@@ -157,7 +157,7 @@ async fn main() {
             let mut cnt_changed = 0;
             for i in 0..g.len() {
                 for j in 0..g[0].len() {
-                    if look_change_map[i][j] {
+                    if neighbor_of_updated_cell[i][j] {
                         cnt_changed += 1;
                     }
                 }
