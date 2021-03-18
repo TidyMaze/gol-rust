@@ -36,12 +36,12 @@ fn count_neighbors(grid: &Grid, j: usize, i: usize) -> u8 {
     return cnt;
 }
 
-fn one_step(grid: &mut Grid, buffer: &mut Grid, look_change_map: &mut Grid) {
+fn one_step(grid: &mut Grid, buffer: &mut Grid, neighbor_of_changed_cell: &mut Grid) {
     for i in 0..grid.len() {
         for j in 0..grid[0].len() {
-            if look_change_map[i][j] {
+            if neighbor_of_changed_cell[i][j] {
                 buffer[i][j] = dead_or_alive(grid[i][j], count_neighbors(grid, j, i));
-                look_change_map[i][j] = false;
+                neighbor_of_changed_cell[i][j] = false;
             }
         }
     }
@@ -53,10 +53,10 @@ fn one_step(grid: &mut Grid, buffer: &mut Grid, look_change_map: &mut Grid) {
                     let dj: i16 = j as i16 + o_j;
                     let di: i16 = i as i16 + o_i;
                     if in_map(grid, dj, di) {
-                        look_change_map[di as usize][dj as usize] = true;
+                        neighbor_of_changed_cell[di as usize][dj as usize] = true;
                     }
                 }
-                look_change_map[i][j] = true;
+                neighbor_of_changed_cell[i][j] = true;
             }
             grid[i][j] = buffer[i][j];
         }
