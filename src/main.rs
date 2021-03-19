@@ -119,7 +119,7 @@ fn make_rand_grid(height: usize, width: usize) -> Grid {
     let mut res: Grid = Vec::new();
     for _i in 0..height {
         for _j in 0..width {
-            res.push(gen_range(0, 101) < 50);
+            res.push(gen_range(0, 101) < 10);
         }
     }
     return res;
@@ -137,8 +137,8 @@ fn make_and_set_camera(aspect_ratio: f32) -> Camera2D {
     let camera = Camera2D::from_display_rect(Rect {
         x: 0 as f32,
         y: 0 as f32,
-        w: aspect_ratio * 200 as f32,
-        h: 200 as f32,
+        w: aspect_ratio * 1000 as f32,
+        h: 1000 as f32,
     });
     set_camera(camera);
     camera
@@ -146,8 +146,8 @@ fn make_and_set_camera(aspect_ratio: f32) -> Camera2D {
 
 #[macroquad::main("BasicShapes")]
 async fn main() {
-    let height = 200 as usize;
-    let width = 200 as usize;
+    let height = 1000 as usize;
+    let width = 2000 as usize;
 
     println!("{} {}", height, width);
 
