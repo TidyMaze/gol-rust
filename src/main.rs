@@ -25,14 +25,9 @@ fn dead_or_alive(alive: bool, neighbors: u8) -> bool {
 }
 
 const OFFSETS: [(i16, i16); 8] = [
-    (0 - 1, 0 - 1),
-    (0, 0 - 1),
-    (0 + 1, 0 - 1),
-    (0 - 1, 0),
-    (0 + 1, 0),
-    (0 - 1, 0 + 1),
-    (0, 0 + 1),
-    (0 + 1, 0 + 1),
+    (-1, - 1), (0,- 1), (1,- 1),
+    (-1, 0),            (1, 0),
+    (-1, 1),   (0,1),   (1, 1),
 ];
 
 fn in_map(width: usize, height: usize, j: i16, i: i16) -> bool {
