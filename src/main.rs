@@ -94,24 +94,18 @@ fn one_step(
     }
 }
 
-fn make_empty_grid<T: Copy>(height: usize, width: usize, value: T) -> Vec<T> {
+fn fill_grid<T: Copy>(height: usize, width: usize, f: fn(usize, usize) -> T) -> Vec<T> {
     let mut res: Vec<T> = Vec::new();
-    for _i in 0..height {
-        for _j in 0..width {
-            res.push(value);
+    for i in 0..height {
+        for j in 0..width {
+            res.push(f(j,i));
         }
     }
     return res;
 }
 
 fn make_rand_grid(height: usize, width: usize) -> Grid {
-    let mut res: Grid = Vec::new();
-    for _i in 0..height {
-        for _j in 0..width {
-            res.push(gen_range(0, 101) < 10);
-        }
-    }
-    return res;
+    return fill_grid(height, width, |_, _| gen_range(0, 101) < 10);
 }
 
 fn map_range(from_range: (f32, f32), to_range: (f32, f32), s: f32) -> f32 {
@@ -144,14 +138,14 @@ async fn main() {
     let mut main_grid_state = make_rand_grid(height as usize, width as usize);
 
     // a temperature decreasing to create a fade-out effect after a cell is turned off
-    let mut hot = make_empty_grid(height as usize, width as usize, 0);
+    let mut hot = fill_grid(height as usize, width as usize,|_,_| 0);
 
     // new state before swapping with main_grid_state. Avoids allocating a new Vec at each step
-    let mut buffer = make_empty_grid(height as usize, width as usize, false);
+    let mut buffer = fill_grid(height as usize, width as usize, |_,_| false);
 
     // keep track of all cells that are touching a cell that just changed state.
     // All others will be ignored. It allows skipping ~95% of the cells in late-game.
-    let mut neighbor_of_updated_cell = make_empty_grid(height as usize, width as usize, true);
+    let mut neighbor_of_updated_cell = fill_grid(height as usize, width as usize, |_,_| true);
 
     let mut color = Color::new(0.00, 0.00, 0.00, 1.00);
 
