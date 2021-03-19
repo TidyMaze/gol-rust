@@ -131,8 +131,8 @@ fn map_range(from_range: (f32, f32), to_range: (f32, f32), s: f32) -> f32 {
 
 #[macroquad::main("BasicShapes")]
 async fn main() {
-    let height = screen_height() as usize;
-    let width = screen_width() as usize;
+    let height = screen_height() as usize / 2;
+    let width = screen_width() as usize / 2;
 
     println!("{} {}", height, width);
 
@@ -156,7 +156,7 @@ async fn main() {
     let mut img: Image = Image::gen_image_color(width as u16, height as u16, BLACK);
 
     loop {
-        let step = 4;
+        let step = 5;
 
         for _sub in 0..step {
             one_step(
