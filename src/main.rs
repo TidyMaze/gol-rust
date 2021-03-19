@@ -233,6 +233,7 @@ async fn main() {
         }
 
         update_texture(texture, &img);
+        set_texture_filter(texture, macroquad::texture::FilterMode::Nearest);
         draw_texture(texture, 0 as f32, 0 as f32, WHITE);
         next_frame().await
     }
