@@ -25,9 +25,14 @@ fn dead_or_alive(alive: bool, neighbors: u8) -> bool {
 }
 
 const OFFSETS: [(i16, i16); 8] = [
-    (-1, - 1), (0,- 1), (1,- 1),
-    (-1, 0),            (1, 0),
-    (-1, 1),   (0,1),   (1, 1),
+    (-1, -1),
+    (0, -1),
+    (1, -1),
+    (-1, 0),
+    (1, 0),
+    (-1, 1),
+    (0, 1),
+    (1, 1),
 ];
 
 fn in_map(width: usize, height: usize, j: i16, i: i16) -> bool {
@@ -98,7 +103,7 @@ fn fill_grid<T: Copy>(height: usize, width: usize, f: fn(usize, usize) -> T) -> 
     let mut res: Vec<T> = Vec::new();
     for i in 0..height {
         for j in 0..width {
-            res.push(f(j,i));
+            res.push(f(j, i));
         }
     }
     return res;
@@ -109,7 +114,7 @@ fn map_range(from_range: (f32, f32), to_range: (f32, f32), s: f32) -> f32 {
 }
 
 fn aspect_ratio() -> f32 {
-    return screen_width() / screen_height()
+    return screen_width() / screen_height();
 }
 
 fn make_and_set_camera(aspect_ratio: f32) -> Camera2D {
@@ -134,14 +139,14 @@ async fn main() {
     let mut main_grid_state = fill_grid(height, width, |_, _| gen_range(0, 101) < 10);
 
     // a temperature decreasing to create a fade-out effect after a cell is turned off
-    let mut hot = fill_grid(height, width,|_,_| 0);
+    let mut hot = fill_grid(height, width, |_, _| 0);
 
     // new state before swapping with main_grid_state. Avoids allocating a new Vec at each step
-    let mut buffer = fill_grid(height, width, |_,_| false);
+    let mut buffer = fill_grid(height, width, |_, _| false);
 
     // keep track of all cells that are touching a cell that just changed state.
     // All others will be ignored. It allows skipping ~95% of the cells in late-game.
-    let mut neighbor_of_updated_cell = fill_grid(height, width, |_,_| true);
+    let mut neighbor_of_updated_cell = fill_grid(height, width, |_, _| true);
 
     let mut color = Color::new(0.00, 0.00, 0.00, 1.00);
 
