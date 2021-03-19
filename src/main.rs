@@ -119,7 +119,7 @@ fn make_rand_grid(height: usize, width: usize) -> Grid {
     let mut res: Grid = Vec::new();
     for _i in 0..height {
         for _j in 0..width {
-            res.push(gen_range(0, 101) < 7);
+            res.push(gen_range(0, 101) < 50);
         }
     }
     return res;
@@ -129,10 +129,25 @@ fn map_range(from_range: (f32, f32), to_range: (f32, f32), s: f32) -> f32 {
     to_range.0 + (s - from_range.0) * (to_range.1 - to_range.0) / (from_range.1 - from_range.0)
 }
 
+fn aspect_ratio() -> f32 {
+    return screen_width() / screen_height()
+}
+
+fn make_and_set_camera(aspect_ratio: f32) -> Camera2D {
+    let camera = Camera2D::from_display_rect(Rect {
+        x: 0 as f32,
+        y: 0 as f32,
+        w: aspect_ratio * 200 as f32,
+        h: 200 as f32,
+    });
+    set_camera(camera);
+    camera
+}
+
 #[macroquad::main("BasicShapes")]
 async fn main() {
-    let height = screen_height() as usize;
-    let width = screen_width() as usize;
+    let height = 200 as usize;
+    let width = 200 as usize;
 
     println!("{} {}", height, width);
 
@@ -154,9 +169,12 @@ async fn main() {
     let total_cells = height * width;
 
     let mut img: Image = Image::gen_image_color(width as u16, height as u16, BLACK);
+    
 
     loop {
-        let step = 3;
+        make_and_set_camera(aspect_ratio());
+
+        let step = 1;
 
         for _sub in 0..step {
             one_step(
