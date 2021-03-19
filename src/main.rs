@@ -2,7 +2,23 @@ use macroquad::prelude::rand::gen_range;
 use macroquad::prelude::*;
 use std::time::SystemTime;
 
-type Grid = Vec<Vec<bool>>;
+type Grid = Vec<bool>;
+
+fn coord_to_index(width: usize, j: usize, i: usize) -> usize {
+    return i * width + j;
+}
+
+fn index_to_coord(width: usize, index: usize) -> (usize, usize) {
+    return (index % width, index / width);
+}
+
+fn set_grid(g: &mut Grid, width: usize, j: usize, i: usize, v: bool) {
+    g[coord_to_index(width, j, i)] = v;
+}
+
+fn get_grid(g: &Grid, width: usize, j: usize, i: usize) -> bool {
+    return g[coord_to_index(width, j, i)];
+}
 
 fn dead_or_alive(alive: bool, neighbors: u8) -> bool {
     return (alive && neighbors >= 2 && neighbors <= 3) || (!alive && neighbors == 3);
@@ -19,72 +35,71 @@ const OFFSETS: [(i16, i16); 8] = [
     (0 + 1, 0 + 1),
 ];
 
-fn in_map(grid: &Grid, j: i16, i: i16) -> bool {
-    return j >= 0 && j < grid[0].len() as i16 && i >= 0 && i < grid.len() as i16;
+fn in_map(width: usize, height: usize, j: i16, i: i16) -> bool {
+
+    return j >= 0 && j < width as i16 && i >= 0 && i < height as i16;
 }
 
-fn count_neighbors(grid: &Grid, j: usize, i: usize) -> u8 {
+fn count_neighbors(width: usize, height: usize, grid: &Grid, j: usize, i: usize) -> u8 {
     let mut cnt = 0;
     for (o_j, o_i) in &OFFSETS {
         let dj: i16 = j as i16 + o_j;
         let di: i16 = i as i16 + o_i;
-        if in_map(grid, dj, di) && grid[di as usize][dj as usize] {
-            cnt += 1;
+        if in_map(width, height, dj, di){
+            if get_grid(grid, width, dj as usize, di as usize) {
+                cnt += 1;
+            }
         }
     }
 
     return cnt;
 }
 
-fn one_step(grid: &mut Grid, buffer: &mut Grid, neighbor_of_changed_cell: &mut Grid) {
-    for i in 0..grid.len() {
-        for j in 0..grid[0].len() {
-            if neighbor_of_changed_cell[i][j] {
-                buffer[i][j] = dead_or_alive(grid[i][j], count_neighbors(grid, j, i));
-                neighbor_of_changed_cell[i][j] = false;
+fn one_step(grid: &mut Grid, buffer: &mut Grid, width: usize, height: usize, neighbor_of_changed_cell: &mut Grid) {
+    for i in 0..height {
+        for j in 0..width {
+            let idx = coord_to_index(width, j, i);
+            if neighbor_of_changed_cell[idx] {
+                buffer[idx] = dead_or_alive(grid[idx], count_neighbors(width, height, grid, j, i));
+                neighbor_of_changed_cell[idx] = false;
             }
         }
     }
 
-    for i in 0..grid.len() {
-        for j in 0..grid[0].len() {
-            if buffer[i][j] != grid[i][j] {
+    for i in 0..height {
+        for j in 0..width {
+            let idx = coord_to_index(width, j, i);
+            if buffer[idx] != grid[idx] {
                 for (o_j, o_i) in &OFFSETS {
                     let dj: i16 = j as i16 + o_j;
                     let di: i16 = i as i16 + o_i;
-                    if in_map(grid, dj, di) {
-                        neighbor_of_changed_cell[di as usize][dj as usize] = true;
+                    if in_map(width, height, dj, di) {
+                        set_grid(neighbor_of_changed_cell, width, dj as usize, di as usize, true);
                     }
                 }
-                neighbor_of_changed_cell[i][j] = true;
+                neighbor_of_changed_cell[idx] = true;
             }
-            grid[i][j] = buffer[i][j];
+            grid[idx] = buffer[idx];
         }
     }
 }
 
-fn make_empty_grid(height: usize, width: usize) -> Vec<Vec<u8>> {
-    let mut res: Vec<Vec<u8>> = Vec::new();
+fn make_empty_grid(height: usize, width: usize) -> Vec<u8> {
+    let mut res: Vec<u8> = Vec::new();
     for _i in 0..height {
-        let mut line: Vec<u8> = Vec::new();
-
         for _j in 0..width {
-            line.push(0);
+            res.push(0);
         }
-        res.push(line);
     }
     return res;
 }
 
-fn make_empty_grid_bool(height: usize, width: usize, value: bool) -> Vec<Vec<bool>> {
-    let mut res: Vec<Vec<bool>> = Vec::new();
+fn make_empty_grid_bool(height: usize, width: usize, value: bool) -> Grid {
+    let mut res: Grid = Vec::new();
     for _i in 0..height {
-        let mut line: Vec<bool> = Vec::new();
-
         for _j in 0..width {
-            line.push(value);
+            res.push(value);
         }
-        res.push(line);
     }
     return res;
 }
@@ -92,12 +107,9 @@ fn make_empty_grid_bool(height: usize, width: usize, value: bool) -> Vec<Vec<boo
 fn make_rand_grid(height: usize, width: usize) -> Grid {
     let mut res: Grid = Vec::new();
     for _i in 0..height {
-        let mut line: Vec<bool> = Vec::new();
-
         for _j in 0..width {
-            line.push(gen_range(0, 101) < 7);
+            res.push(gen_range(0, 101) < 7);
         }
-        res.push(line);
     }
     return res;
 }
@@ -108,8 +120,8 @@ fn map_range(from_range: (f32, f32), to_range: (f32, f32), s: f32) -> f32 {
 
 #[macroquad::main("BasicShapes")]
 async fn main() {
-    let height = screen_height() as u32;
-    let width = screen_width() as u32;
+    let height = screen_height() as usize;
+    let width = screen_width() as usize;
 
     println!("{} {}", height, width);
 
@@ -136,15 +148,15 @@ async fn main() {
         let step = 2;
 
         for _sub in 0..step {
-            one_step(&mut g, &mut buffer, &mut neighbor_of_updated_cell);
+            one_step(&mut g, &mut buffer, width, height, &mut neighbor_of_updated_cell);
             count_step += 1;
             let elapsed = SystemTime::now().duration_since(start).unwrap().as_secs();
             let speed = count_step as f32 / elapsed as f32;
 
             let mut cnt_changed = 0;
-            for i in 0..g.len() {
-                for j in 0..g[0].len() {
-                    if neighbor_of_updated_cell[i][j] {
+            for i in 0..height {
+                for j in 0..width {
+                    if get_grid(&neighbor_of_updated_cell, width, j, i) {
                         cnt_changed += 1;
                     }
                 }
@@ -162,18 +174,19 @@ async fn main() {
 
         for i in 0..height as usize {
             for j in 0..width as usize {
-                if g[i][j] {
-                    hot[i][j] = 255;
+                let idx = coord_to_index(width, j, i);
+                if g[idx] {
+                    hot[idx] = 255;
                     img.set_pixel(j as u32, i as u32, WHITE);
                 } else {
-                    if hot[i][j] > 100 {
-                        hot[i][j] = hot[i][j] - 1;
+                    if hot[idx] > 100 {
+                        hot[idx] = hot[idx] - 1;
                     }
-                    if hot[i][j] > 0 {
+                    if hot[idx] > 0 {
                         color.b = map_range(
                             (0 as f32, 255 as f32),
                             (0.0 as f32, 1.0 as f32),
-                            hot[i][j] as f32,
+                            hot[idx] as f32,
                         );
                         img.set_pixel(j as u32, i as u32, color);
                     }
