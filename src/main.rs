@@ -190,30 +190,30 @@ async fn main() {
             );
         }
 
-        // for i in 0..height as usize {
-        //     for j in 0..width as usize {
-        //         let idx = coord_to_index(width, j, i);
-        //         if g[idx] {
-        //             hot[idx] = 255;
-        //             img.set_pixel(j as u32, i as u32, WHITE);
-        //         } else {
-        //             if hot[idx] > 100 {
-        //                 hot[idx] -= 1;
-        //             }
-        //             if hot[idx] > 0 {
-        //                 color.b = map_range(
-        //                     (0 as f32, 255 as f32),
-        //                     (0.0 as f32, 1.0 as f32),
-        //                     hot[idx] as f32,
-        //                 );
-        //                 img.set_pixel(j as u32, i as u32, color);
-        //             }
-        //         }
-        //     }
-        // }
+        for i in 0..height as usize {
+            for j in 0..width as usize {
+                let idx = coord_to_index(width, j, i);
+                if g[idx] {
+                    hot[idx] = 255;
+                    img.set_pixel(j as u32, i as u32, WHITE);
+                } else {
+                    if hot[idx] > 100 {
+                        hot[idx] -= 1;
+                    }
+                    if hot[idx] > 0 {
+                        color.b = map_range(
+                            (0 as f32, 255 as f32),
+                            (0.0 as f32, 1.0 as f32),
+                            hot[idx] as f32,
+                        );
+                        img.set_pixel(j as u32, i as u32, color);
+                    }
+                }
+            }
+        }
 
-        // update_texture(texture, &img);
-        // draw_texture(texture, 0 as f32, 0 as f32, WHITE);
+        update_texture(texture, &img);
+        draw_texture(texture, 0 as f32, 0 as f32, WHITE);
         next_frame().await
     }
 }
