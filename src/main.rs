@@ -156,7 +156,7 @@ async fn main() {
     let mut img: Image = Image::gen_image_color(width as u16, height as u16, BLACK);
 
     loop {
-        let step = 2;
+        let step = 4;
 
         for _sub in 0..step {
             one_step(
@@ -180,12 +180,13 @@ async fn main() {
             }
 
             println!(
-                "{} - {} - changed look up {} / {} (skipped {}% with lookup)",
+                "{} - {} - changed look up {} / {} (skipped {}% with lookup) fps {}",
                 count_step,
                 speed as u16,
                 cnt_changed,
                 total_cells,
-                100 - ((cnt_changed as f32 / total_cells as f32) * 100 as f32) as u16
+                100 - ((cnt_changed as f32 / total_cells as f32) * 100 as f32) as u16,
+                get_fps()
             );
         }
 
