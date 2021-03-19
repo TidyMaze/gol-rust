@@ -121,8 +121,8 @@ fn make_and_set_camera(aspect_ratio: f32) -> Camera2D {
     let camera = Camera2D::from_display_rect(Rect {
         x: 0 as f32,
         y: 0 as f32,
-        w: aspect_ratio * 1000 as f32,
-        h: 1000 as f32,
+        w: aspect_ratio * 500 as f32,
+        h: 500 as f32,
     });
     set_camera(camera);
     camera
@@ -130,8 +130,8 @@ fn make_and_set_camera(aspect_ratio: f32) -> Camera2D {
 
 #[macroquad::main("BasicShapes")]
 async fn main() {
-    let height = 1000 as usize;
-    let width = 2000 as usize;
+    let height = 500 as usize;
+    let width = 1000 as usize;
 
     println!("{} {}", height, width);
 
@@ -155,6 +155,8 @@ async fn main() {
 
     // what will be displayed on window
     let texture = load_texture_from_image(&img);
+    set_texture_filter(texture, macroquad::texture::FilterMode::Nearest);
+
 
     let start = SystemTime::now();
     let mut count_step: u32 = 0;
@@ -223,7 +225,6 @@ async fn main() {
         }
 
         update_texture(texture, &img);
-        set_texture_filter(texture, macroquad::texture::FilterMode::Nearest);
         draw_texture(texture, 0 as f32, 0 as f32, WHITE);
         next_frame().await
     }
