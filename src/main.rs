@@ -104,10 +104,6 @@ fn fill_grid<T: Copy>(height: usize, width: usize, f: fn(usize, usize) -> T) -> 
     return res;
 }
 
-fn make_rand_grid(height: usize, width: usize) -> Grid {
-    return fill_grid(height, width, |_, _| gen_range(0, 101) < 10);
-}
-
 fn map_range(from_range: (f32, f32), to_range: (f32, f32), s: f32) -> f32 {
     to_range.0 + (s - from_range.0) * (to_range.1 - to_range.0) / (from_range.1 - from_range.0)
 }
@@ -135,17 +131,17 @@ async fn main() {
     println!("{} {}", height, width);
 
     // main grid, business state here
-    let mut main_grid_state = make_rand_grid(height as usize, width as usize);
+    let mut main_grid_state = fill_grid(height, width, |_, _| gen_range(0, 101) < 10);
 
     // a temperature decreasing to create a fade-out effect after a cell is turned off
-    let mut hot = fill_grid(height as usize, width as usize,|_,_| 0);
+    let mut hot = fill_grid(height, width,|_,_| 0);
 
     // new state before swapping with main_grid_state. Avoids allocating a new Vec at each step
-    let mut buffer = fill_grid(height as usize, width as usize, |_,_| false);
+    let mut buffer = fill_grid(height, width, |_,_| false);
 
     // keep track of all cells that are touching a cell that just changed state.
     // All others will be ignored. It allows skipping ~95% of the cells in late-game.
-    let mut neighbor_of_updated_cell = fill_grid(height as usize, width as usize, |_,_| true);
+    let mut neighbor_of_updated_cell = fill_grid(height, width, |_,_| true);
 
     let mut color = Color::new(0.00, 0.00, 0.00, 1.00);
 
@@ -199,8 +195,8 @@ async fn main() {
             }
         }
 
-        for i in 0..height as usize {
-            for j in 0..width as usize {
+        for i in 0..height {
+            for j in 0..width {
                 let idx = coord_to_index(width, j, i);
                 if main_grid_state[idx] {
                     hot[idx] = 255;
