@@ -61,6 +61,8 @@ fn one_step(
     height: usize,
     neighbor_of_changed_cell: &mut Grid,
 ) {
+    // only consider cells that changed in last step
+    // write new state to buffer
     for i in 0..height {
         for j in 0..width {
             let idx = coord_to_index(width, j, i);
@@ -71,6 +73,8 @@ fn one_step(
         }
     }
 
+    // if cell changed, mark all its neighbors in cache
+    // then swap buffer with grid
     for i in 0..height {
         for j in 0..width {
             let idx = coord_to_index(width, j, i);
@@ -95,18 +99,8 @@ fn one_step(
     }
 }
 
-fn make_empty_grid(height: usize, width: usize) -> Vec<u8> {
-    let mut res: Vec<u8> = Vec::new();
-    for _i in 0..height {
-        for _j in 0..width {
-            res.push(0);
-        }
-    }
-    return res;
-}
-
-fn make_empty_grid_bool(height: usize, width: usize, value: bool) -> Grid {
-    let mut res: Grid = Vec::new();
+fn make_empty_grid<T: Copy>(height: usize, width: usize, value: T) -> Vec<T> {
+    let mut res: Vec<T> = Vec::new();
     for _i in 0..height {
         for _j in 0..width {
             res.push(value);
@@ -151,34 +145,40 @@ async fn main() {
 
     println!("{} {}", height, width);
 
-    let mut hot = make_empty_grid(height as usize, width as usize);
+    // main grid, business state here
+    let mut main_grid_state = make_rand_grid(height as usize, width as usize);
 
-    let mut g = make_rand_grid(height as usize, width as usize);
-    let mut buffer = make_empty_grid_bool(height as usize, width as usize, false);
-    let mut neighbor_of_updated_cell = make_empty_grid_bool(height as usize, width as usize, true);
+    // a temperature decreasing to create a fade-out effect after a cell is turned off
+    let mut hot = make_empty_grid(height as usize, width as usize, 0);
+
+    // new state before swapping with main_grid_state. Avoids allocating a new Vec at each step
+    let mut buffer = make_empty_grid(height as usize, width as usize, false);
+
+    // keep track of all cells that are touching a cell that just changed state.
+    // All others will be ignored. It allows skipping ~95% of the cells in late-game.
+    let mut neighbor_of_updated_cell = make_empty_grid(height as usize, width as usize, true);
 
     let mut color = Color::new(0.00, 0.00, 0.00, 1.00);
 
-    let texture =
-        load_texture_from_image(&Image::gen_image_color(width as u16, height as u16, BLACK));
+    // where we draw pixels
+    let mut img: Image = Image::gen_image_color(width as u16, height as u16, BLACK);
+
+    // what will be displayed on window
+    let texture = load_texture_from_image(&img);
 
     let start = SystemTime::now();
-
     let mut count_step: u32 = 0;
-
     let total_cells = height * width;
 
-    let mut img: Image = Image::gen_image_color(width as u16, height as u16, BLACK);
-    
-
     loop {
+        // keep aspect ratio, window will fit vertically and horizontal will be cut
         make_and_set_camera(aspect_ratio());
 
         let step = 1;
 
         for _sub in 0..step {
             one_step(
-                &mut g,
+                &mut main_grid_state,
                 &mut buffer,
                 width,
                 height,
@@ -213,7 +213,7 @@ async fn main() {
         for i in 0..height as usize {
             for j in 0..width as usize {
                 let idx = coord_to_index(width, j, i);
-                if g[idx] {
+                if main_grid_state[idx] {
                     hot[idx] = 255;
                     img.set_pixel(j as u32, i as u32, WHITE);
                 } else {
