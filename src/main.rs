@@ -231,7 +231,7 @@ async fn main() {
                 *h = 255;
                 img.set_pixel(j as u32, i as u32, WHITE);
             } else {
-                if *h > 100 {
+                if *h > 50 {
                     *h -= 1;
                 }
                 if *h > 0 {
