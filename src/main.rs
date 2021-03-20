@@ -54,6 +54,65 @@ fn count_neighbors(width: usize, height: usize, grid: &Grid, j: usize, i: usize)
     return cnt;
 }
 
+fn update_neighbors(
+    width: usize,
+    height: usize,
+    neighbor_of_changed_cell: &mut Grid,
+    j: usize,
+    i: usize,
+) {
+    for (o_j, o_i) in &OFFSETS {
+        let dj: i16 = j as i16 + o_j;
+        let di: i16 = i as i16 + o_i;
+        if in_map(width, height, dj, di) {
+            set_grid(
+                neighbor_of_changed_cell,
+                width,
+                dj as usize,
+                di as usize,
+                true,
+            );
+        }
+    }
+}
+
+fn new_state(
+    width: usize,
+    height: usize,
+    neighbor_of_changed_cell: &mut Grid,
+    buffer: &mut Grid,
+    grid: &mut Grid,
+) {
+    // only consider cells that changed in last step
+    // write new state to buffer
+    for (idx, e) in grid.iter().enumerate() {
+        if neighbor_of_changed_cell[idx] {
+            let (j, i) = index_to_coord(width, idx);
+            buffer[idx] = dead_or_alive(*e, count_neighbors(width, height, grid, j, i));
+            neighbor_of_changed_cell[idx] = false;
+        }
+    }
+}
+
+fn swap(
+    width: usize,
+    height: usize,
+    neighbor_of_changed_cell: &mut Grid,
+    buffer: &mut Grid,
+    grid: &mut Grid,
+) {
+    // if cell changed, mark all its neighbors in cache
+    // then swap buffer with grid
+    for (idx, e) in grid.iter_mut().enumerate() {
+        if buffer[idx] != *e {
+            let (j, i) = index_to_coord(width, idx);
+            update_neighbors(width, height, neighbor_of_changed_cell, j, i);
+            neighbor_of_changed_cell[idx] = true;
+        }
+        *e = buffer[idx];
+    }
+}
+
 fn one_step(
     grid: &mut Grid,
     buffer: &mut Grid,
@@ -61,42 +120,8 @@ fn one_step(
     height: usize,
     neighbor_of_changed_cell: &mut Grid,
 ) {
-    // only consider cells that changed in last step
-    // write new state to buffer
-    for i in 0..height {
-        for j in 0..width {
-            let idx = coord_to_index(width, j, i);
-            if neighbor_of_changed_cell[idx] {
-                buffer[idx] = dead_or_alive(grid[idx], count_neighbors(width, height, grid, j, i));
-                neighbor_of_changed_cell[idx] = false;
-            }
-        }
-    }
-
-    // if cell changed, mark all its neighbors in cache
-    // then swap buffer with grid
-    for i in 0..height {
-        for j in 0..width {
-            let idx = coord_to_index(width, j, i);
-            if buffer[idx] != grid[idx] {
-                for (o_j, o_i) in &OFFSETS {
-                    let dj: i16 = j as i16 + o_j;
-                    let di: i16 = i as i16 + o_i;
-                    if in_map(width, height, dj, di) {
-                        set_grid(
-                            neighbor_of_changed_cell,
-                            width,
-                            dj as usize,
-                            di as usize,
-                            true,
-                        );
-                    }
-                }
-                neighbor_of_changed_cell[idx] = true;
-            }
-            grid[idx] = buffer[idx];
-        }
-    }
+    new_state(width, height, neighbor_of_changed_cell, buffer, grid);
+    swap(width, height, neighbor_of_changed_cell, buffer, grid);
 }
 
 fn fill_grid<T: Copy>(height: usize, width: usize, f: fn(usize, usize) -> T) -> Vec<T> {
@@ -157,7 +182,6 @@ async fn main() {
     let texture = load_texture_from_image(&img);
     set_texture_filter(texture, macroquad::texture::FilterMode::Nearest);
 
-
     let start = SystemTime::now();
     let mut count_step: u32 = 0;
     let total_cells = height * width;
@@ -166,7 +190,7 @@ async fn main() {
         // keep aspect ratio, window will fit vertically and horizontal will be cut
         make_and_set_camera(aspect_ratio());
 
-        let step = 1;
+        let step = 10;
 
         for _sub in 0..step {
             one_step(
@@ -181,11 +205,10 @@ async fn main() {
             let speed = count_step as f32 / elapsed as f32;
 
             let mut cnt_changed = 0;
-            for i in 0..height {
-                for j in 0..width {
-                    if get_grid(&neighbor_of_updated_cell, width, j, i) {
-                        cnt_changed += 1;
-                    }
+
+            for e in neighbor_of_updated_cell.iter() {
+                if *e {
+                    cnt_changed += 1;
                 }
             }
 
@@ -202,24 +225,19 @@ async fn main() {
             }
         }
 
-        for i in 0..height {
-            for j in 0..width {
-                let idx = coord_to_index(width, j, i);
-                if main_grid_state[idx] {
-                    hot[idx] = 255;
-                    img.set_pixel(j as u32, i as u32, WHITE);
-                } else {
-                    if hot[idx] > 100 {
-                        hot[idx] -= 1;
-                    }
-                    if hot[idx] > 0 {
-                        color.b = map_range(
-                            (0 as f32, 255 as f32),
-                            (0.0 as f32, 1.0 as f32),
-                            hot[idx] as f32,
-                        );
-                        img.set_pixel(j as u32, i as u32, color);
-                    }
+        for (idx, h) in hot.iter_mut().enumerate() {
+            let (j, i) = index_to_coord(width, idx);
+            if main_grid_state[idx] {
+                *h = 255;
+                img.set_pixel(j as u32, i as u32, WHITE);
+            } else {
+                if *h > 100 {
+                    *h -= 1;
+                }
+                if *h > 0 {
+                    color.b =
+                        map_range((0 as f32, 255 as f32), (0.0 as f32, 1.0 as f32), *h as f32);
+                    img.set_pixel(j as u32, i as u32, color);
                 }
             }
         }
